@@ -54,7 +54,7 @@ insert into class(id, class_name) values(1, "火箭班");
 insert into class(class_name) values("骏马班");
 ```
 
-使用pymysqlplus轻松的进行CRUD
+使用pymysqldao轻松的进行CRUD
 
 ```python
 import pymysql
