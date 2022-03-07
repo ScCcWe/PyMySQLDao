@@ -3,6 +3,7 @@
 # file_name: setup.py.py
 # author: ScCcWe
 # time: 2022/3/6 11:34 下午
+import os
 import setuptools
 
 with open("./README.md", "r", encoding="utf-8") as fh:
@@ -10,7 +11,15 @@ with open("./README.md", "r", encoding="utf-8") as fh:
 
 version_str = "0.0.3"
 
-REQUIRED_DEP = ["PyMySQL", "termcolor"]
+
+def get_install_requires():
+    install_requires = ["PyMySQL", "termcolor"]
+
+    if os.name == "nt":  # Windows
+        install_requires.append("colorama")
+
+    return install_requires
+
 
 setuptools.setup(
     name="pymysql_dao",
@@ -35,6 +44,6 @@ setuptools.setup(
     # package_dir={"": "pymysqldao"},
     # packages=setuptools.find_packages(where="pymysqldao", exclude=["tests*"]),
     packages=setuptools.find_packages(exclude=["tests*"]),
-    install_requires=REQUIRED_DEP,
+    install_requires=get_install_requires(),
     python_requires=">=3.7",
 )
