@@ -32,8 +32,9 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    package_dir={"": "pymysqldao"},
-    packages=setuptools.find_packages(where="pymysqldao", exclude=["tests*"]),
+    # package_dir={"": "pymysqldao"},
+    # packages=setuptools.find_packages(where="pymysqldao", exclude=["tests*"]),
+    packages=setuptools.find_packages(exclude=["tests*"]),
     install_requires=REQUIRED_DEP,
     python_requires=">=3.7",
 )

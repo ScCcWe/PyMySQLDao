@@ -15,7 +15,7 @@ termcolor
 ## Install
 
 ```bash
-$ pip install pymysql-curd
+$ pip install pymysql-dao
 ```
 
 ## Example
