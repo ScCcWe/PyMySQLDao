@@ -4,6 +4,5 @@ requires = [
     "wheel",
     "PyMySQL",
     "termcolor",
-    "colorama",
 ]
 build-backend = "setuptools.build_meta"

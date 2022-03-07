@@ -8,9 +8,13 @@ import setuptools
 with open("./README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
+version_str = "0.0.2"
+
+REQUIRED_DEP = ["PyMySQL", "termcolor"]
+
 setuptools.setup(
-    name="PyMySQLDao",
-    version="0.0.1",
+    name="pymysql_dao",
+    version=version_str,
     author="ScCcWe",
     author_email="scccwe@163.com",
     description="A functional enhancement package that focus on crud based PyMySQL",
@@ -30,5 +34,6 @@ setuptools.setup(
     ],
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src", exclude=["tests*", "examples*"]),
+    install_requires=REQUIRED_DEP,
     python_requires=">=3.7",
 )

@@ -10,10 +10,12 @@ PyMySQLPlus是建立在PyMySQL上的功能增强库，方便用户进行简单�
 
 [PyMySQL](https://github.com/PyMySQL/PyMySQL)
 
+termcolor
+
 ## Install
 
 ```bash
-$ pip install PyMySQLCRUDPlus
+$ pip install pymysql-dao
 ```
 
 ## Example
@@ -35,7 +37,7 @@ create table class (
 
 ```python
 import pymysql
-from src.pymysqldao import BaseDao
+from pymysqldao import BaseDao
 
 db_example_conn = pymysql.connect(
     host='localhost',
