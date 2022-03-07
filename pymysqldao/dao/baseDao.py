@@ -251,7 +251,7 @@ class BaseDao:
         finally:
             return row_num if row_num else None
 
-    def delete_by_id(self, id, id_field_name="id"):
+    def delete_by_id(self, id, primary_key="id"):
         if not id:
             raise ValueError("param `id` can't accept null-type value")
         if type(id) != str and type(id) != int:
@@ -259,7 +259,7 @@ class BaseDao:
 
         try:
             with self.connection.cursor() as cursor:
-                sql = f"delete from {self.table_name} where {id_field_name} = %s"
+                sql = f"delete from {self.table_name} where {primary_key} = %s"
                 rows = cursor.execute(sql, (id,))
                 if DEBUG and self.debug:
                     logger.info(f"Execute SQL: {sql}")

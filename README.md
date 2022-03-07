@@ -1,10 +1,12 @@
-# PyMySQLPlus
+# PyMySQLDao
 
-不想使用繁琐的ORM框架？又想具备一定的ORM功能？来使用PyMySQLPlus吧！
+## Introduce
 
-PyMySQLPlus是建立在PyMySQL上的功能增强库，方便用户进行简单的进行CRUD；
+PyMySQLDao是建立在PyMySQL上的功能增强库，方便用户进行CRUD；
 
-你只需要简单两步，就可以获得基本的CRUD功能！无需在去使用繁琐的ORM框架！
+在不影响任何代码的情况下，只需要简单几行代码，便可获得单表的CRUD功能！
+
+欢迎提出修改意见！🥳🥳🥳
 
 ## Requirements
 
@@ -12,17 +14,33 @@ PyMySQLPlus是建立在PyMySQL上的功能增强库，方便用户进行简单�
 
 termcolor
 
+colorama（only in windows）
+
 ## Install
 
 ```bash
-$ pip install pymysql-dao
+(venv)$ pip install pymysql-dao
 ```
+
+> 说明：如果上述的命令无法下载，请考虑使用下列命令：
+>
+> - pypi官方
+>
+>     `$ pip install pymysql-dao --index-url https://pypi.org/simple/`
+>
+> - 清华源
+>
+>     `$ pip install pymysql-dao --index-url https://pypi.tuna.tsinghua.edu.cn/simple/`
 
 ## Example
 
-假设有下面一个`class`表
+假设使用下列SQL语句：
 
 ```sql
+create database python_example;
+
+use python_example;
+
 create table class (
    id bigint(20) primary key auto_increment,
    class_name varchar(50) not null unique,
@@ -31,6 +49,9 @@ create table class (
 )engine=innodb
  auto_increment=1
  default charset=utf8;
+ 
+insert into class(id, class_name) values(1, "火箭班");
+insert into class(class_name) values("骏马班");
 ```
 
 使用pymysqlplus轻松的进行CRUD
@@ -50,9 +71,7 @@ db_example_conn = pymysql.connect(
 
 class ClassDao(BaseDao):
     def __init__(self):
-        super(ClassDao, self).__init__()
-        self.connection = db_example_conn
-        self.table_name = "class"
+        super(ClassDao, self).__init__(db_example_conn, "class")
 
 
 if __name__ == '__main__':
@@ -74,4 +93,16 @@ if __name__ == '__main__':
     # select by id_list
     class_dao.select_by_id_list([1, 2, 3])  # default primary_key is "id"
     class_dao.select_by_id_list([1, 2, 3], primary_key="class_id")
+    
+    # insert
+    obj_dict = {"class_name": "少年班"}
+    class_dao.insert_one(obj_dict)
+    
+    # update
+    new_obj_id_1 = {'id': 1, 'class_name': '火箭班修改', 'is_delete': 0}
+    class_dao.update_by_id(new_obj_id_1)
+    
+    # delete
+    class_dao.delete_by_id(1)
+    class_dao.delete_by_id(1, primary_key="class_id")
 ```
