@@ -1,7 +1,7 @@
 import pytest
 
 from tests import none_list, student_obj_list_id_123
-from examples.studentDao import StudentDao
+from tests.dao.studentDao import StudentDao
 
 studentDao = StudentDao()
 

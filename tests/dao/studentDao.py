@@ -3,9 +3,9 @@
 # file_name: studentDao.py
 # author: ScCcWe
 # time: 2022/3/4 10:54 上午
-from src.pymysqldao import BaseDao
+from pymysqldao import BaseDao
 
-from examples.connections_ import db_example_conn
+from .connections_ import db_example_conn
 
 
 class StudentDao(BaseDao):

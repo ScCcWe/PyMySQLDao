@@ -3,8 +3,8 @@
 # file_name: test_insert.py
 # author: ScCcWe
 # time: 2022/3/4 4:38 下午
-from examples.classDao import ClassDao
-from examples.studentDao import StudentDao
+from tests.dao.classDao import ClassDao
+from tests.dao.studentDao import StudentDao
 
 class_dao = ClassDao()
 student_dao = StudentDao()

@@ -14,7 +14,7 @@ if os.name == "nt":  # Windows
 
     colorama.init()
 
-from src.pymysqldao.constant import COMMON
+from pymysqldao.constant import COMMON
 
 COLORS = {
     "WARNING": "yellow",

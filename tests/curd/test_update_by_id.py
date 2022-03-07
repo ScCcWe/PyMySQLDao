@@ -3,7 +3,7 @@
 # file_name: test_insert.py
 # author: ScCcWe
 # time: 2022/3/4 4:38 下午
-from examples.classDao import ClassDao
+from tests.dao.classDao import ClassDao
 
 class_dao = ClassDao()
 

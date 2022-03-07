@@ -15,7 +15,7 @@ termcolor
 ## Install
 
 ```bash
-$ pip install pymysql-dao
+$ pip install pymysql-curd
 ```
 
 ## Example
@@ -75,4 +75,3 @@ if __name__ == '__main__':
     class_dao.select_by_id_list([1, 2, 3])  # default primary_key is "id"
     class_dao.select_by_id_list([1, 2, 3], primary_key="class_id")
 ```
-

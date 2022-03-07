@@ -8,7 +8,7 @@ import setuptools
 with open("./README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-version_str = "0.0.2"
+version_str = "0.0.3"
 
 REQUIRED_DEP = ["PyMySQL", "termcolor"]
 
@@ -32,8 +32,8 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    package_dir={"": "src"},
-    packages=setuptools.find_packages(where="src", exclude=["tests*", "examples*"]),
+    package_dir={"": "pymysqldao"},
+    packages=setuptools.find_packages(where="pymysqldao", exclude=["tests*"]),
     install_requires=REQUIRED_DEP,
     python_requires=">=3.7",
 )

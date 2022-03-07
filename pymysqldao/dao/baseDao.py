@@ -7,9 +7,9 @@ from typing import List, Dict
 
 from pymysql.connections import Connection
 
-from src.pymysqldao.log.logger import logger
-from src.pymysqldao.constant.COMMON import DEBUG
-from src.pymysqldao.err import ParamTypeError, ParamNoneError
+from pymysqldao.log.logger import logger
+from pymysqldao.constant.COMMON import DEBUG
+from pymysqldao.err import ParamTypeError, ParamNoneError
 
 
 class BaseDao:
