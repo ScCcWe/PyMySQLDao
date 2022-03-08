@@ -3,20 +3,20 @@
 # file_name: setup.py.py
 # author: ScCcWe
 # time: 2022/3/6 11:34 下午
-import os
+# import os
 import setuptools
 
 with open("./README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-version_str = "0.0.4"
+version_str = "0.0.6"
 
 
 def get_install_requires():
-    install_requires = ["PyMySQL", "termcolor"]
+    install_requires = ["PyMySQL", "termcolor", "colorama"]
 
-    if os.name == "nt":  # Windows
-        install_requires.append("colorama")
+    # if os.name == "nt":  # Windows
+    #     install_requires.append("colorama")
 
     return install_requires
 
