@@ -11,13 +11,12 @@ from pymysqldao.log.logger import logger
 from pymysqldao.constant.COMMON import DEBUG
 from pymysqldao.err import ParamTypeError, ParamNoneError
 
+from .databaseDao import DatabaseDao
 
-class BaseDao:
+
+class BaseDao(DatabaseDao):
     def __init__(self, connection: Connection, table_name: str):
-        if not connection:
-            raise ValueError
-        else:
-            self.connection = connection
+        super(BaseDao, self).__init__(connection)
 
         if not table_name:
             raise ValueError
@@ -30,37 +29,6 @@ class BaseDao:
         # 默认如果不配置此属性的话，都是有DEBUG的;
         # 可以单独配置关闭；防止多个DaoClass，有的想debug，有的不想;
         self.debug = True
-
-    # def select_by_id2(self, id_, primary_key="id"):
-    #     """
-    #
-    #     根据给定的`主键值`查询出一条数据
-    #
-    #     :param id_: 需要查询的主键值；如：1， "1"， 2， "3"； # type: int / str；
-    #     :param primary_key: 主键名默认是"id"；如果主键名不是"id"，应该显式的给出；
-    #     :return: Dict / None
-    #     """
-    #     if not id_:
-    #         raise ParamNoneError("param `id` can't accept null-type value")
-    #     if type(id_) != int and type(id_) != str:
-    #         raise ParamTypeError("param `id` can only accept int or str type")
-    #     if type(primary_key) != str:
-    #         raise ParamTypeError("param `primary_key` can only accept str type")
-    #
-    #     sql = f"select * from {self.table_name} where {primary_key} = %s"
-    #     try:
-    #         with self.connection.cursor() as cursor:
-    #             execute_result = cursor.execute(sql, (str(id_),))
-    #             if DEBUG and self.debug:
-    #                 logger.info(f"Execute SQL: {sql}")
-    #                 logger.info(f"Query OK, {execute_result} rows affected")
-    #             # 这里使用fetchone是没问题的，因为主键一定是unique
-    #             result = cursor.fetchone()
-    #     except Exception as e:
-    #         logger.error(f"Execute SQL: {sql}")
-    #         logger.error(f"Query Exception: {e}")
-    #     finally:
-    #         return result if result else None
 
     def select_by_id(self, id_value, primary_key="id"):
         return self.select_by_field(id_value, field_key=primary_key, limit_size=1)
@@ -133,6 +101,7 @@ class BaseDao:
                     logger.info(f"Execute SQL: {sql}")
                     logger.info(f"Query OK, {execute_result} rows affected")
 
+                # TODO：结果list的长度为1，是否应该直接返回dict？
                 if limit_size:  # by_id / by_unique_field
                     if limit_size == 1:
                         result = cursor.fetchone()
@@ -175,19 +144,25 @@ class BaseDao:
         finally:
             return result if result is not None else None
 
-    def insert_one(self, obj_dict: Dict):
+    def insert_one(self, obj_dict: Dict, primary_key="id"):
         """
         :param obj_dict: 需要插入的数据（以dict格式
-        :return:
+        :param primary_key: 主键名，默认为"id"
+        :return: affect_rows_num（1）
         """
         def generate_sql(obj: Dict):
             field_list = []
             value_list = []
             placeholder_list = []
             for key, value in obj.items():
-                field_list.append(key)
+                if key != primary_key:
+                    field_list.append(key)
+                    value_list.append(str(value))
+                else:
+                    # id值必须要第一位（如果有的情况下
+                    field_list.insert(0, key)
+                    value_list.insert(0, str(value))
                 placeholder_list.append("%s")
-                value_list.append(str(value))
             sql = f"INSERT INTO {self.table_name} ({', '.join(field_list)}) " \
                   f"VALUES ({', '.join(placeholder_list)})"
             return sql, value_list

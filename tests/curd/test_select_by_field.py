@@ -23,4 +23,4 @@ def test_select_by_field_query():
     """
     id_list: type: List<int> / List<str>
     """
-    assert studentDao.select_by_field("张三1", "student_name")[0] == student_obj_list_id_123[0]
+    assert studentDao.select_by_field("张三", "student_name")[0] == student_obj_list_id_123[0]
