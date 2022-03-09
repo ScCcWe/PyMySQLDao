@@ -1,21 +1,36 @@
 # !/usr/bin/env python 
 # -*- coding: utf-8 -*-
-# file_name: databaseDao.py
+# file_name: base_.py
 # author: ScCcWe
 # time: 2022/3/8 9:48 上午
+import logging
+
 from pymysql.connections import Connection
-from pymysqldao.log.logger import logger
-from pymysqldao.constant.COMMON import DEBUG
+from pymysqldao.constant_ import MODULE_NAME
+from pymysqldao._err import ParamBooleanFalseError, ParamTypeError
+
+"""
+在使用pymysqldao时，可以自行设置LOGGER的输出方式和格式；
+如下设置例：展示DEBUG及以上信息并普通打印
+>>> import sys
+>>> import logging
+>>> 
+>>> from pymysqldao import LOGGER
+>>> 
+>>> LOGGER.setLevel(logging.DEBUG)
+>>> LOGGER.addHandler(logging.StreamHandler(sys.stderr))
+"""
+LOGGER = logging.getLogger(MODULE_NAME)
 
 
 class DatabaseDao:
     def __init__(self, connection: Connection):
         if not connection:
-            raise ValueError
+            raise ParamBooleanFalseError("param connection can't accept 【bool(connection) -> False】 value")
+        elif type(connection) != Connection:
+            raise ParamTypeError("param connection can only accept pymysql.connections.Connection type")
         else:
             self.connection = connection
-
-        self.debug = True
 
     def execute_sql(self, sql: str, commit=False):
         """
@@ -35,9 +50,9 @@ class DatabaseDao:
         try:
             with self.connection.cursor() as cursor:
                 rows = cursor.execute(sql)
-                if DEBUG and self.debug:
-                    logger.info(f"Execute SQL: {sql}")
-                    logger.info(f"Query OK, {rows} rows affected")
+
+                LOGGER.info(f"Execute SQL: {sql}")
+                LOGGER.info(f"Query OK, {rows} rows affected")
 
                 result = cursor.fetchall()
 
@@ -53,7 +68,7 @@ class DatabaseDao:
                         break
 
         except Exception as e:
-            logger.error(f"Execute SQL: {sql}")
-            logger.error(f"Query Exception: {e}")
+            LOGGER.exception(f"Execute SQL: {sql}")
+            LOGGER.exception(f"Query Exception: {e}")
         finally:
             return result if result else None

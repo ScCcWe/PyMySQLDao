@@ -3,7 +3,7 @@
 # file_name: test_execute.py
 # author: ScCcWe
 # time: 2022/3/8 9:45 上午
-from tests.dao.studentDao import StudentDao
+from tests.dao.table_dao import StudentDao
 
 student_dao = StudentDao()
 

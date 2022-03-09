@@ -3,7 +3,7 @@
 # file_name: test_delete.py
 # author: ScCcWe
 # time: 2022/3/6 10:33 下午
-from tests.dao.studentDao import StudentDao
+from tests.dao.table_dao import StudentDao
 
 student_dao = StudentDao()
 

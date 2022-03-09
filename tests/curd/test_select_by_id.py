@@ -6,7 +6,7 @@
 import pytest
 
 from tests import none_list, class_obj_id_1
-from tests.dao.classDao import ClassDao
+from tests.dao.table_dao import ClassDao
 
 classDao = ClassDao()
 

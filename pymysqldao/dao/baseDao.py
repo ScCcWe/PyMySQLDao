@@ -7,14 +7,11 @@ from typing import List, Dict
 
 from pymysql.connections import Connection
 
-from pymysqldao.log.logger import logger
-from pymysqldao.constant.COMMON import DEBUG
-from pymysqldao.err import ParamTypeError, ParamNoneError
-
-from .databaseDao import DatabaseDao
+from pymysqldao._err import ParamTypeError, ParamBooleanFalseError
+from pymysqldao.dao import base_
 
 
-class BaseDao(DatabaseDao):
+class BaseDao(base_.DatabaseDao):
     def __init__(self, connection: Connection, table_name: str):
         super(BaseDao, self).__init__(connection)
 
@@ -46,7 +43,7 @@ class BaseDao(DatabaseDao):
         :return: List[Dict] / None
         """
         if not id_list:
-            raise ParamNoneError("param `id_list` can't be null-type value")
+            raise ParamBooleanFalseError("param `id_list` can't be null-type value")
         if not isinstance(id_list, list):
             raise ParamTypeError("param `id_list` can only accept List type")
         if type(primary_key) != str:
@@ -63,16 +60,17 @@ class BaseDao(DatabaseDao):
         try:
             with self.connection.cursor() as cursor:
                 execute_result = cursor.execute(sql, ([str(_) for _ in id_list],))
-                if DEBUG and self.debug:
-                    logger.info(f"Execute SQL: {sql}")
-                    logger.info(f"Query OK, {execute_result} rows affected")
+
+                base_.LOGGER.info(f"Execute SQL: {sql}")
+                base_.LOGGER.info(f"Query OK, {execute_result} rows affected")
+
                 if limit_tag:
                     result = cursor.fetchmany(self.limit)
                 else:
                     result = cursor.fetchall()
         except Exception as e:
-            logger.info(f"Execute SQL: {sql}")
-            logger.info(f"Query Exception: {e}")
+            base_.LOGGER.exception(f"Execute SQL: {sql}")
+            base_.LOGGER.exception(f"Query Exception: {e}")
         finally:
             return result if result else None
 
@@ -84,10 +82,10 @@ class BaseDao(DatabaseDao):
         :param field_value: 字段值
         :param field_key: 字段名
         :param limit_size: 如果方法上设置了limit_size，则优先使用limit_size，而不是self.size
-        :return:
+        :return: List<Dict> / Dict （除了id查询会返回Dict之外，即便是查询出的结果为单个，也会返回List<Dict>
         """
         if not field_value:
-            raise ParamNoneError("param `field_value` can't accept null-type value")
+            raise ParamBooleanFalseError("param `field_value` can't accept null-type value")
         if type(field_value) != int and type(field_value) != str:
             raise ParamTypeError("param `field_value` can only accept int or str type")
         if type(field_key) != str:
@@ -97,13 +95,12 @@ class BaseDao(DatabaseDao):
         try:
             with self.connection.cursor() as cursor:
                 execute_result = cursor.execute(sql, (str(field_value),))
-                if DEBUG and self.debug:
-                    logger.info(f"Execute SQL: {sql}")
-                    logger.info(f"Query OK, {execute_result} rows affected")
 
-                # TODO：结果list的长度为1，是否应该直接返回dict？
+                base_.LOGGER.info(f"Execute SQL: {sql}")
+                base_.LOGGER.info(f"Query OK, {execute_result} rows affected")
+
                 if limit_size:  # by_id / by_unique_field
-                    if limit_size == 1:
+                    if limit_size == 1 and "id" in field_key:
                         result = cursor.fetchone()
                     else:
                         result = cursor.fetchmany(limit_size)
@@ -112,8 +109,8 @@ class BaseDao(DatabaseDao):
                 else:
                     result = cursor.fetchall()
         except Exception as e:
-            logger.error(f"Execute SQL: {sql}")
-            logger.error(f"Query Exception: {e}")
+            base_.LOGGER.exception(f"Execute SQL: {sql}")
+            base_.LOGGER.exception(f"Query Exception: {e}")
         finally:
             return result if result else None
 
@@ -134,13 +131,14 @@ class BaseDao(DatabaseDao):
         try:
             with self.connection.cursor() as cursor:
                 execute = cursor.execute(sql)
-                if DEBUG and self.debug:
-                    logger.info(f"Execute SQL: {sql}")
-                    logger.info(f"Query OK, {execute} rows affected")
+
+                base_.LOGGER.info(f"Execute SQL: {sql}")
+                base_.LOGGER.info(f"Query OK, {execute} rows affected")
+
                 result = cursor.fetchmany(limit_size if self.limit > limit_size else self.limit)
         except Exception as e:
-            logger.info(f"Execute SQL: {sql}")
-            logger.info(f"Query Exception: {e}")
+            base_.LOGGER.exception(f"Execute SQL: {sql}")
+            base_.LOGGER.exception(f"Query Exception: {e}")
         finally:
             return result if result is not None else None
 
@@ -174,20 +172,21 @@ class BaseDao(DatabaseDao):
             with self.connection.cursor() as cursor:
                 sql, value_list = generate_sql(obj_dict)
                 row_num = cursor.execute(sql, tuple(value_list))
-                if DEBUG and self.debug:
-                    logger.info(f"Execute SQL: {sql}")
-                    logger.info(f"Query OK, {row_num} rows affected")
+
+                base_.LOGGER.info(f"Execute SQL: {sql}")
+                base_.LOGGER.info(f"Query OK, {row_num} rows affected")
+
             if not self.connection.get_autocommit():
                 self.connection.commit()
         except Exception as e:
-            logger.error(f"Execute SQL: {sql}")
-            logger.error(f"Query Exception: {e}")
+            base_.LOGGER.exception(f"Execute SQL: {sql}")
+            base_.LOGGER.exception(f"Query Exception: {e}")
         finally:
             return row_num if row_num else None
 
     def insert_many(self, obj_dict_list: List[Dict[str, object]]):
         if not obj_dict_list:
-            raise ParamNoneError("param `obj_dict_list` can't be none-type value")
+            raise ParamBooleanFalseError("param `obj_dict_list` can't be none-type value")
         if not isinstance(obj_dict_list, list):
             raise ParamTypeError("param `obj_dict_list` can only accept list type")
 
@@ -215,14 +214,15 @@ class BaseDao(DatabaseDao):
             with self.connection.cursor() as cursor:
                 sql = generate_sql(obj_dict)
                 row_num = cursor.execute(sql, (obj_dict.get(primary_key),))
-                if DEBUG and self.debug:
-                    logger.info(f"Execute SQL: {sql}")
-                    logger.info(f"Query OK, {row_num} rows affected")
+
+                base_.LOGGER.info(f"Execute SQL: {sql}")
+                base_.LOGGER.info(f"Query OK, {row_num} rows affected")
+
             if not self.connection.get_autocommit():
                 self.connection.commit()
         except Exception as e:
-            logger.error(f"Execute SQL: {sql}")
-            logger.error(f"Query Exception: {e}")
+            base_.LOGGER.exception(f"Execute SQL: {sql}")
+            base_.LOGGER.exception(f"Query Exception: {e}")
         finally:
             return row_num if row_num else None
 
@@ -236,14 +236,15 @@ class BaseDao(DatabaseDao):
             with self.connection.cursor() as cursor:
                 sql = f"delete from {self.table_name} where {primary_key} = %s"
                 rows = cursor.execute(sql, (id,))
-                if DEBUG and self.debug:
-                    logger.info(f"Execute SQL: {sql}")
-                    logger.info(f"Query OK, {rows} rows affected")
+
+                base_.LOGGER.info(f"Execute SQL: {sql}")
+                base_.LOGGER.info(f"Query OK, {rows} rows affected")
+
             if not self.connection.get_autocommit():
                 self.connection.commit()
         except Exception as e:
-            logger.error(f"Execute SQL: {sql}")
-            logger.error(f"Query Exception: {e}")
+            base_.LOGGER.exception(f"Execute SQL: {sql}")
+            base_.LOGGER.exception(f"Query Exception: {e}")
         finally:
             return rows if rows else None
 

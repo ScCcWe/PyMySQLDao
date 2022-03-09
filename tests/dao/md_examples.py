@@ -1,40 +1,8 @@
-# PyMySQLDao
-
-## Introduce
-
-PyMySQLDao是建立在PyMySQL上的功能增强库，方便用户进行CRUD；
-
-在不影响任何代码的情况下，只需要简单几行代码，便可获得表的CRUD功能！
-
-欢迎提出修改意见！🥳🥳🥳
-
-## Requirements
-
-[PyMySQL](https://github.com/PyMySQL/PyMySQL)
-
-## Install
-
-```bash
-(venv)$ pip install pymysql-dao
-```
-
-> 说明：如果上述的命令无法下载，请考虑使用下列命令：
->
-> - pypi官方
->
->     `$ pip install pymysql-dao --index-url https://pypi.org/simple/`
->
-> - 清华源
->
->     `$ pip install pymysql-dao --index-url https://pypi.tuna.tsinghua.edu.cn/simple/`
-
-## Example
-
-假设使用此[SQL文件](https://github.com/ScCcWe/PyMySQLDao/blob/master/tests/dao/data.sql)
-
-使用pymysqldao进行CRUD
-
-```python
+# !/usr/bin/env python 
+# -*- coding: utf-8 -*-
+# file_name: md_examples.py
+# author: ScCcWe
+# time: 2022/3/9 9:23 上午
 import sys
 import logging
 
@@ -95,4 +63,3 @@ if __name__ == '__main__':
 
     # delete
     class_dao.delete_by_id(result[0]["id"])
-```

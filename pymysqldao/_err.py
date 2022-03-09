@@ -1,10 +1,10 @@
 # !/usr/bin/env python 
 # -*- coding: utf-8 -*-
-# file_name: err.py
+# file_name: _err.py
 # author: ScCcWe
 # time: 2022/3/6 10:54 上午
-class ParamNoneError(ValueError):
-    """参数值为None"""
+class ParamBooleanFalseError(ValueError):
+    """参数值为空错误，这个空包括0, 0.0, -0, 0j, '', None, [], (), {}"""
 
 
 class ParamTypeError(TypeError):

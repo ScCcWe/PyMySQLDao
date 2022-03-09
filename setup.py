@@ -9,14 +9,14 @@ import setuptools
 with open("./README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-version_str = "0.0.6"
+version_str = "0.0.7"
 
 
 def get_install_requires():
-    install_requires = ["PyMySQL", "termcolor", "colorama"]
+    install_requires = ["PyMySQL"]
 
     # if os.name == "nt":  # Windows
-    #     install_requires.append("colorama")
+    #     install_requires.append("")
 
     return install_requires
 
