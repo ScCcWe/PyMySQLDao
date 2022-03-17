@@ -4,4 +4,4 @@
 # author: ScCcWe
 # time: 2022/3/5 9:32 上午
 MODULE_NAME = "PyMySQLDao"
-FALSE_VALUE_LIST = [0, 0.0, -0, 0j, '', None, [], (), {}]
+FALSE_VALUE_LIST = [None, [], (), {}]

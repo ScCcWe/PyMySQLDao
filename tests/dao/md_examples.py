@@ -18,7 +18,7 @@ LOGGER.addHandler(logging.StreamHandler(sys.stderr))
 conn = pymysql.connect(
     host='localhost',
     user='root',
-    password='root',
+    password='beicuide123',
     database='python_example',
     cursorclass=pymysql.cursors.DictCursor
 )

@@ -25,3 +25,8 @@ class ClassDao(BaseDao):
 class StudentDao(BaseDao):
     def __init__(self):
         super().__init__(db_example_conn, "student")
+
+
+class TeacherDao(BaseDao):
+    def __init__(self):
+        super(TeacherDao, self).__init__(db_example_conn, "teacher")

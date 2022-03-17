@@ -19,8 +19,8 @@ def test_update_by_id():
     class_dao.update_by_id(obj_id_1)
 
     # 对比
-    class_obj = class_dao.select_by_id(1)
-    assert class_obj["class_name"] == new_class_name
+    obj_id_1 = class_dao.select_by_id(1)
+    assert obj_id_1["class_name"] == new_class_name
 
     # 对比完了之后，改回来
     obj_id_1["class_name"] = origin_class_name
