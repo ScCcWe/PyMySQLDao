@@ -12,14 +12,16 @@ from pymysqldao.msg_ import param_cant_none
 
 """
 在使用pymysqldao时，可以自行设置LOGGER的输出方式和格式；
-如下设置例：展示DEBUG及以上信息并普通打印
->>> import sys
->>> import logging
->>> 
->>> from pymysqldao import LOGGER
->>> 
->>> LOGGER.setLevel(logging.DEBUG)
->>> LOGGER.addHandler(logging.StreamHandler(sys.stderr))
+
+    如下设置例：展示DEBUG及以上信息，并打印在控制台上
+    >>> import sys
+    >>> import logging
+    >>> 
+    >>> from pymysqldao import LOGGER
+    >>> 
+    >>> LOGGER.setLevel(logging.DEBUG)
+    >>> LOGGER.addHandler(logging.StreamHandler(sys.stderr))
+    
 """
 LOGGER = logging.getLogger(MODULE_NAME)
 
@@ -31,7 +33,8 @@ class DatabaseDao:
         elif type(connection) != Connection:
             raise ParamTypeError("param connection can only accept pymysql.connections.Connection type")
         else:
-            # _表示私有属性，别人最好不要在外部修改
+            # _表示私有属性，别人最好不要在外部修改；
+            # 即：最好在创建对象时指定
             self._connection = connection
 
     def execute_sql(self, sql: str, commit=False):

@@ -6,6 +6,7 @@
 from typing import List, Dict, Union
 
 from pymysql.connections import Connection
+from pydantic import BaseModel, validator
 
 from pymysqldao import msg_
 from pymysqldao.decorator_ import all_param_type_check
@@ -15,6 +16,44 @@ from pymysqldao.err_ import (
     PrimaryKeyError,
 )
 from pymysqldao.dao import base_
+
+
+class VSelectById(BaseModel):
+    # 主键值
+    id_value: str = 1
+
+    # 主键名，默认为"id"
+    primary_key: str = 'id'
+
+    @validator("id_value")
+    def id_value_cant_none(cls, v):
+        if not v:
+            raise ValueError(msg_.param_cant_none("id_value"))
+        return str(v)
+
+
+class VSelectByField(BaseModel):
+    # 字段名
+    field_key: str
+
+    # 字段值
+    field_value: str
+
+    # 限制显示的结果数量
+    # 默认为20
+    limit_size: int = 20
+
+    @validator("field_key")
+    def field_key_cant_none(cls, v):
+        if not v:
+            raise ValueError(msg_.param_cant_none("field_key"))
+        return v
+
+    @validator("field_value")
+    def field_value_cant_none(cls, v):
+        if not v:
+            raise ValueError(msg_.param_cant_none("field_value"))
+        return v
 
 
 class BaseDao(base_.DatabaseDao):
@@ -27,22 +66,31 @@ class BaseDao(base_.DatabaseDao):
             # __表示受保护的属性，不希望别人在外部修改
             self.__table_name = table_name
 
-    def select_by_id(self, id_value: Union[int, str], primary_key='id') -> Dict:
+    def validation_select_by_id(self, params: VSelectById) -> Dict:
         """
 
-        select * from table_name where primary_key = id_value
+        select * from table_name where `id` = id_value
 
-        :param id_value: 主键值
-        :param primary_key: 主键名，默认为"id"
         :return: Dict
         """
-        query_list = self.select_by_field(id_value, field_key=primary_key)
+        id_value = params.id_value
+        primary_key = params.primary_key
+        query_list = self.select_by_field(primary_key, id_value)
+
         if len(query_list) == 1:
             return query_list[0]
         else:
             msg = f"check out if use the right primary key? current primary key is: {primary_key}"
             base_.LOGGER.error(msg)
             raise PrimaryKeyError(msg)
+
+    def select_by_id(self, id_value: str, primary_key='id') -> Dict:
+        params_input = {
+            "id_value": id_value,
+            "primary_key": primary_key,
+        }
+        data = VSelectById(**params_input)
+        return self.validation_select_by_id(data)
 
     # @all_param_type_check
     def select_by_id_list(self, id_list: List[Union[str, int]], limit_size=0, primary_key="id"):
@@ -94,22 +142,21 @@ class BaseDao(base_.DatabaseDao):
         finally:
             return result if result else None
 
-    @all_param_type_check
-    def select_by_field(self, field_value: Union[str, int], field_key: str, limit_size=None) -> List[Dict[str, object]]:
+    def validation_select_by_field(self, params: VSelectByField) -> List[Dict[str, object]]:
         """
 
-        select * from table_name where field_key = field_value
+        select * from table_name where `field_key` = field_value
 
-        :param field_value: 字段值
-        :param field_key: 字段名
-        :param limit_size: 限制显示的结果数量
         :return: List<Dict> / Dict （查询出的结果为单个，会返回Dict
         """
-        if not limit_size:
-            limit_size = 20
+        field_key = params.field_key
+        field_value = params.field_value
+        limit_size = params.limit_size
 
-        if not field_value:
-            raise ParamBoolFalseError(msg_.param_cant_none("field_value"))
+        # assert not field_value
+
+        # if not field_value:
+        #     raise ParamBoolFalseError(msg_.param_cant_none("field_value"))
 
         sql = f"select * from {self.__table_name} where {field_key} = %s"
         try:
@@ -128,6 +175,15 @@ class BaseDao(base_.DatabaseDao):
             base_.LOGGER.exception(f"Query Exception: {e}")
         finally:
             return result if result else None
+
+    def select_by_field(self, key, value, limit=20):
+        input_params = {
+            "field_key": key,
+            "field_value": value,
+            "limit_size": limit,
+        }
+        data = VSelectByField(**input_params)
+        return self.validation_select_by_field(data)
 
     def select_list(self, limit_size=0):
         """
@@ -167,6 +223,7 @@ class BaseDao(base_.DatabaseDao):
         :param primary_key: 主键名，默认为"id"
         :return: affect_rows_num（1）
         """
+
         def generate_sql(obj: Dict):
             field_list = []
             value_list = []
@@ -221,6 +278,7 @@ class BaseDao(base_.DatabaseDao):
         :param primary_key:
         :return:
         """
+
         def generate_sql(obj_dict):
             field_value_list = []
             for field, value in obj_dict.items():
@@ -237,7 +295,7 @@ class BaseDao(base_.DatabaseDao):
 
         if primary_key == "id" and primary_key not in obj_dict:  # not obj_dict.has_key("id")
             raise PrimaryKeyError("如果主键列名不是`id`，请显式的指出主键列名")
-        
+
         try:
             with self._connection.cursor() as cursor:
                 sql = generate_sql(obj_dict)
@@ -265,6 +323,7 @@ class BaseDao(base_.DatabaseDao):
         :param field_key: 字段名
         :return:
         """
+
         def get_primary_key(obj: Dict):
             """从item中获取primary的名，一般是'id'"""
             first_key = list(obj.keys())[0]

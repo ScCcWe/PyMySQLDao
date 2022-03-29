@@ -13,15 +13,15 @@ classDao = ClassDao()
 
 
 def test_validation():
-    for none_value in [0j, None, [], (), {}]:
-        pytest.raises(err_.ParamTypeError, classDao.select_by_id, none_value)
+    for none_value in ["", 0j, None, [], (), {}]:
+        pytest.raises(ValueError, classDao.select_by_id, none_value)
 
-    for a in [0, -0, ""]:
-        pytest.raises(err_.ParamBoolFalseError, classDao.select_by_id, a)
+    # for a in [0, -0]:
+    #     pytest.raises(ValueError, classDao.select_by_id, a)
 
 
 def test_param_type():
-    pytest.raises(err_.ParamTypeError, classDao.select_by_id, 1, 1)
+    pytest.raises(err_.PrimaryKeyError, classDao.select_by_id, 1, 1)
 
 
 def test_query():
