@@ -56,6 +56,30 @@ class VSelectByField(BaseModel):
         return v
 
 
+class VSelectByIdList(BaseModel):
+    # 包含需要查询的所有id值的list, eg: [1, 2, 3], ["1", "2", "3"], ["1", 2, "3"];
+    id_list: List[Union[str, int]]
+
+    # 限制显示的结果数量
+    limit_size: int = 20
+
+    # 主键名默认是"id"；如果主键名不是"id"，应该显式的给出；
+    primary_key: str = "id"
+
+    @validator("id_list")
+    def id_list_pre_validation(cls, v):
+        if not v:
+            raise ValueError(msg_.param_cant_none("id_list"))
+        # if not isinstance(v, list):
+        #     raise TypeError(msg_.param_only_accept_list("id_list"))
+        # for item in v:
+        #     if type(item) == str or type(item) == int:
+        #         ...
+        #     else:
+        #         raise ParamTypeError(msg_.param_should_listUnionStrInt("id_list"))
+        return v
+
+
 class BaseDao(base_.DatabaseDao):
     def __init__(self, connection: Connection, table_name: str):
         super(BaseDao, self).__init__(connection)
@@ -84,7 +108,7 @@ class BaseDao(base_.DatabaseDao):
             base_.LOGGER.error(msg)
             raise PrimaryKeyError(msg)
 
-    def select_by_id(self, id_value: str, primary_key='id') -> Dict:
+    def select_by_id(self, id_value: str, primary_key: str = 'id') -> Dict:
         params_input = {
             "id_value": id_value,
             "primary_key": primary_key,
@@ -93,36 +117,21 @@ class BaseDao(base_.DatabaseDao):
         return self.validation_select_by_id(data)
 
     # @all_param_type_check
-    def select_by_id_list(self, id_list: List[Union[str, int]], limit_size=0, primary_key="id"):
+    def select_by_id_list(self, id_list: List[Union[str, int]], limit_size: int = 20, primary_key: str = "id"):
+        """select * from table where primary_key in id_list"""
+        params_input = {
+            "id_list": id_list,
+            "limit_size": limit_size,
+            "primary_key": primary_key,
+        }
+        return self.validation_select_by_id_list(VSelectByIdList(**params_input))
+
+    def validation_select_by_id_list(self, params: VSelectByIdList):
         """
-
         select * from table where primary_key in id_list
-
-        :param id_list: 包含需要查询的所有id值的list, eg: [1, 2, 3], ["1", "2", "3"], ["1", 2, "3"];
-        :param primary_key: 主键名默认是"id"；如果主键名不是"id"，应该显式的给出；
-        :param limit_size: 限制显示的结果数量
         :return: List[Dict] / None
         """
-        params_list: list = list(locals().keys())
-        param_id_list: str = params_list[params_list.index("id_list")]
-        param_limit_size: str = params_list[params_list.index("limit_size")]
-        param_primary_key: str = params_list[params_list.index("primary_key")]
-
-        if not id_list:
-            raise ParamBoolFalseError(msg_.param_cant_none(param_id_list))
-        if not isinstance(id_list, list):
-            raise ParamTypeError(msg_.param_only_accept_list(param_id_list))
-
-        if type(primary_key) != str:
-            raise ParamTypeError(msg_.param_only_accept_str(param_primary_key))
-
-        for item in id_list:
-            if not item:
-                raise ParamTypeError(msg_.param_cant_none(param_id_list))
-            if type(item) == str or type(item) == int:
-                ...
-            else:
-                raise ParamTypeError(msg_.param_should_listUnionStrInt("id_list"))
+        id_list, limit_size, primary_key = params.id_list, params.limit_size, params.primary_key
 
         sql = f"select * from {self.__table_name} where {primary_key} in %s"
         try:

@@ -6,7 +6,7 @@
 import pytest
 
 from pymysqldao.err_ import ParamTypeError
-from tests import student_obj_list_id_123
+from tests import student_list_123
 from tests.dao.table_dao import StudentDao
 
 studentDao = StudentDao()
@@ -25,4 +25,4 @@ def test_select_list_query_length():
 
 
 def test_select_list_query_data():
-    assert studentDao.select_list() == student_obj_list_id_123
+    assert studentDao.select_list() == student_list_123

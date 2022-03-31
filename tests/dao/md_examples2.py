@@ -32,14 +32,5 @@ class ClassDao(BaseDao):
 if __name__ == '__main__':
     dao = ClassDao()
 
-    # select by field
-    # print(dao.select_by_field("张三", "student_name"))
-    print(dao.select_by_field("", "骏马班"))
-    # print(dao.select_by_field("class_name", ""))
-    # print(dao.select_by_field([1], field_key="class_name"))
-    # print(dao.select_by_field(field_value="骏马班", field_key="class_name").__annotations__)
-    # print(dao.select_by_field(field_key="class_name", field_value="骏马班", limit_size=5))
-    print(dao.select_by_field("class_name", "骏马班"))
-    # print(dao.select_by_field("骏马班", "class_name"))
-    print(dao.select_by_field(field_value="骏马班", field_key="class_name", limit_size=10))
-    # print(dao.execute_sql("select * from class where class_name='骏马班' limit 10"))
+    print(dao.select_by_id_list([1, 2, 3]))
+    print(dao.select_by_id_list(1))

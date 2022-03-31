@@ -1,40 +1,61 @@
+import pymysql
 import pytest
+from pydantic import ValidationError
 
-from tests import none_list, student_obj_list_id_123
-from tests.dao.table_dao import StudentDao
+from pymysqldao import BaseDao, err_
+from tests.curd import base
+from tests import none_list, student_list_123
+
+
+class StudentDao(BaseDao):
+    def __init__(self):
+        super().__init__(base.connect(cursorclass=pymysql.cursors.DictCursor), "student")
+
 
 studentDao = StudentDao()
 
 
-def test_select_by_id_list_val_value():
-    """
-    id_list: type: List<int> / List<str>
-    """
-    for none_value in none_list:
-        pytest.raises(ValueError, studentDao.select_by_id_list, none_value)
+class TestSelectByIdList(base.PyMySQLDaoTestCase):
+    def setUp(self) -> None:
+        self.conn = super().connect(cursorclass=pymysql.cursors.DictCursor)
 
+        with self.conn:
+            with self.conn.cursor() as cursor:
+                student_sql = """
+                    create table if not exists student(
+                        id bigint(20) unsigned primary key auto_increment,
+                        student_name varchar(10) not null,
+                        student_age varchar (5) not null,
+                        class_id bigint(20) not null ,
+                        is_delete tinyint default 0,
+                        index idx_clsid (class_id),
+                        index idx_name (student_name),
+                        index idx_age (student_age)
+                    )engine=innodb
+                     auto_increment=1
+                     default charset=utf8;
+                    """
+                cursor.execute(student_sql)
+            self.conn.commit()
 
-def test_select_by_id_list_val_type():
-    """
-    id_list: type: List<int> / List<str>
-    """
-    pytest.raises(TypeError, studentDao.select_by_id_list, [None])
+            with self.conn.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO student (student_name, student_age, class_id) 
+                    VALUES ("张三", "12", 1), ("李四", "13", 1), ("王五", "11", 2);
+                    """)
+            self.conn.commit()
 
-    pytest.raises(TypeError, studentDao.select_by_id_list, ["", 1, 2])
+    def test_param_validation(self):
+        for none_value in none_list:
+            pytest.raises(ValueError, studentDao.select_by_id_list, none_value)
 
-    pytest.raises(TypeError, studentDao.select_by_id_list, [1, "", 2])
+    def test_query(self):
+        assert studentDao.select_by_id_list([1, 2, 3]) is not None
+        assert studentDao.select_by_id_list([1, 2, 3]) == student_list_123
 
-    pytest.raises(TypeError, studentDao.select_by_id_list, [1, 2, ""])
+        assert studentDao.select_by_id_list([1, "2", 3]) is not None
+        assert studentDao.select_by_id_list([1, "2", 3]) == student_list_123
 
-    pytest.raises(TypeError, studentDao.select_by_id_list, 1)
-
-    pytest.raises(TypeError, studentDao.select_by_id_list, (1, 2))
-
-    pytest.raises(TypeError, studentDao.select_by_id_list, {"key1", "value1"})
-
-
-def test_select_by_id_list_query():
-    assert studentDao.select_by_id_list([1, 2, 3, 5]) is not None
-
-    assert studentDao.select_by_id_list([1, 2, 3]) is not None
-    assert studentDao.select_by_id_list([1, 2, 3]) == student_obj_list_id_123
+    def tearDown(self) -> None:
+        studentDao.execute_sql("use test1")
+        studentDao.execute_sql("drop table student")
