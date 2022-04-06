@@ -12,6 +12,8 @@ PyMySQLDao是建立在PyMySQL上的功能增强库，方便用户进行CRUD；
 
 [PyMySQL](https://github.com/PyMySQL/PyMySQL)
 
+[pydantic](https://github.com/samuelcolvin/pydantic/)
+
 ## Install
 
 ```bash
@@ -35,6 +37,8 @@ PyMySQLDao是建立在PyMySQL上的功能增强库，方便用户进行CRUD；
 使用pymysqldao进行CRUD
 
 ```python
+# !/usr/bin/env python 
+# -*- coding: utf-8 -*-
 import sys
 import logging
 
@@ -50,7 +54,7 @@ LOGGER.addHandler(logging.StreamHandler(sys.stderr))
 conn = pymysql.connect(
     host='localhost',
     user='root',
-    password='root',
+    password='',
     database='python_example',
     cursorclass=pymysql.cursors.DictCursor
 )
@@ -65,31 +69,34 @@ if __name__ == '__main__':
     dao = ClassDao()
 
     # select list
+    dao.execute_sql("select * from class limit 20")
     dao.select_list()
-    dao.select_list(limit_size=500)
+
     dao.execute_sql("select * from class limit 500")
+    dao.select_list(500)
 
     # select by field
-    dao.select_by_field("火箭班", field_key="class_name")
-    dao.select_by_field("骏马班", field_key="class_name", limit_size=10)
     dao.execute_sql("select * from class where class_name='骏马班' limit 10")
+    dao.select_by_field("class_name", "骏马班", limit=10)
+
+    dao.execute_sql("select * from class where class_name='火箭班' limit 20")
+    dao.select_by_field("class_name", "火箭班")
 
     # select by id
-    dao.select_by_id(1)
-    dao.select_by_id("1")
-    dao.select_by_id(1, primary_key="id")
+    # default primary_key is "id"
     dao.execute_sql("select * from class where id=1")
+    dao.select_by_id(1)
 
     # select by id_list
-    dao.select_by_id_list([1, 2, 3])  # default primary_key is "id"
-    dao.select_by_id_list([1, 2, 3], primary_key="id")
+    # default primary_key is "id", u can change it by modify kwarg primary_key
     dao.execute_sql("select * from class where id in (1, 2, 3)")
+    dao.select_by_id_list([1, 2, 3])
 
     # insert
     dao.insert_one({"class_name": "少年班"})
 
     # update
-    result = dao.select_by_field("少年班", field_key="class_name")
+    result = dao.select_by_field("class_name", "少年班")
     result[0]["class_name"] = "少年班修改"
     dao.update_by_id(result[0])
 

@@ -9,11 +9,11 @@ import setuptools
 with open("./README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-version_str = "0.0.8"
+version_str = "0.0.9"
 
 
 def get_install_requires():
-    install_requires = ["PyMySQL"]
+    install_requires = ["PyMySQL", "pydantic"]
 
     # if os.name == "nt":  # Windows
     #     install_requires.append("")

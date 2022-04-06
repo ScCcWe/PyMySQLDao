@@ -189,7 +189,7 @@ class BaseDao(base_.DatabaseDao):
         finally:
             return result if result else None
 
-    def select_by_field(self, key: str, value: str, limit=20):
+    def select_by_field(self, key: str, value: str, limit: int = 20):
         """
 
         :param key: 字段名
@@ -205,9 +205,9 @@ class BaseDao(base_.DatabaseDao):
         data = VSelectByField(**input_params)
         return self.validation_select_by_field(data)
 
-    def select_list(self, limit_size: int = 20):
+    def select_list(self, limit: int = 20):
         params_input = {
-            "limit_size": limit_size
+            "limit_size": limit
         }
         return self.validation_select_list(VSelectList(**params_input))
 
