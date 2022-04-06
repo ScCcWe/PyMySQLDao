@@ -3,25 +3,26 @@
 # file_name: test_insert.py
 # author: ScCcWe
 # time: 2022/3/4 4:38 下午
-from tests.dao.table_dao import ClassDao
-
-class_dao = ClassDao()
+from tests.curd import base
 
 
-def test_update_by_id():
-    # 查询出来一个id为1的对象，并修改它的class_name
-    obj_id_1 = class_dao.select_by_id(1)
-    origin_class_name = obj_id_1["class_name"]
-    new_class_name = obj_id_1["class_name"] + "修改"
-    obj_id_1["class_name"] = new_class_name
+class TestUpdate(base.PyMySQLDaoTestCase):
+    def setUp(self) -> None:
+        super(TestUpdate, self).setUp()
 
-    # 更新
-    class_dao.update_by_id(obj_id_1)
+    def test_update_by_id(self):
+        # 查询出来一个id为1的对象
+        select_by_id_student_obj = self.studentDao.select_by_id(1)
 
-    # 对比
-    obj_id_1 = class_dao.select_by_id(1)
-    assert obj_id_1["class_name"] == new_class_name
+        new_student_name = select_by_id_student_obj["student_name"] + "修改"
+        select_by_id_student_obj["student_name"] = new_student_name
 
-    # 对比完了之后，改回来
-    obj_id_1["class_name"] = origin_class_name
-    class_dao.update_by_id(obj_id_1)
+        # 更新它的student_name
+        self.studentDao.update_by_id(select_by_id_student_obj)
+
+        # 验证更新
+        assert self.studentDao.select_by_id(1)["student_name"] == new_student_name
+
+    def tearDown(self) -> None:
+        self.studentDao.execute_sql("use test1")
+        self.studentDao.execute_sql("drop table student")

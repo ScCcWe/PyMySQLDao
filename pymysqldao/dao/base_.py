@@ -37,11 +37,11 @@ class DatabaseDao:
             # 即：最好在创建对象时指定
             self._connection = connection
 
-    def execute_sql(self, sql: str, commit=False):
+    def execute_sql(self, sql: str, commit: bool = False):
         """
-        如果是正常的查询语句，返回的都是：List<Dict>
-
         如果是["insert", "update", "delete"]，则返回受影响的行数
+
+        否则：都返回：List<Dict>
 
         :param sql: 需要执行的sql语句
         :param commit: 显式的标出是否需要commit

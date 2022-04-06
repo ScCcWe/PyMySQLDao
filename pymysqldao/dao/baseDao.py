@@ -9,7 +9,6 @@ from pymysql.connections import Connection
 from pydantic import BaseModel, validator
 
 from pymysqldao import msg_
-from pymysqldao.decorator_ import all_param_type_check
 from pymysqldao.err_ import (
     ParamTypeError,
     ParamBoolFalseError,
@@ -80,6 +79,11 @@ class VSelectByIdList(BaseModel):
         return v
 
 
+class VSelectList(BaseModel):
+    #         :param limit_size: 查询的limit值；可以为空，默认值是20；
+    limit_size: int = 20
+
+
 class BaseDao(base_.DatabaseDao):
     def __init__(self, connection: Connection, table_name: str):
         super(BaseDao, self).__init__(connection)
@@ -108,7 +112,7 @@ class BaseDao(base_.DatabaseDao):
             base_.LOGGER.error(msg)
             raise PrimaryKeyError(msg)
 
-    def select_by_id(self, id_value: str, primary_key: str = 'id') -> Dict:
+    def select_by_id(self, id_value: Union[str, int], primary_key: str = 'id') -> Dict:
         params_input = {
             "id_value": id_value,
             "primary_key": primary_key,
@@ -185,7 +189,14 @@ class BaseDao(base_.DatabaseDao):
         finally:
             return result if result else None
 
-    def select_by_field(self, key, value, limit=20):
+    def select_by_field(self, key: str, value: str, limit=20):
+        """
+
+        :param key: 字段名
+        :param value: 字段值
+        :param limit:
+        :return:
+        """
         input_params = {
             "field_key": key,
             "field_value": value,
@@ -194,16 +205,20 @@ class BaseDao(base_.DatabaseDao):
         data = VSelectByField(**input_params)
         return self.validation_select_by_field(data)
 
-    def select_list(self, limit_size=0):
+    def select_list(self, limit_size: int = 20):
+        params_input = {
+            "limit_size": limit_size
+        }
+        return self.validation_select_list(VSelectList(**params_input))
+
+    def validation_select_list(self, params: VSelectList):
         """
 
         select * from table_name limit limit_size
 
-        :param limit_size: 查询的limit值；可以为空，默认值是20；
         :return: List[Dict]
         """
-        if type(limit_size) != int:
-            raise ParamTypeError(msg_.param_only_accept_int("limit_size"))
+        limit_size = params.limit_size
 
         sql = f"select * from {self.__table_name}"
         try:
@@ -223,7 +238,7 @@ class BaseDao(base_.DatabaseDao):
         finally:
             return result if result is not None else None
 
-    def insert_one(self, obj_dict: Dict, primary_key="id"):
+    def insert_one(self, obj_dict: Dict, primary_key: str = "id"):
         """
 
         insert into table_name () values ()
