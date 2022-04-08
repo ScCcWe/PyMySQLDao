@@ -8,13 +8,13 @@ import unittest
 import pymysql
 from pymysql.connections import Connection
 
-from pymysqldao import BaseDao
+from pymysqldao import CRUDHelper
 
 databases = [
     {
         "host": "localhost",
         "user": "root",
-        "passwd": "beicuide123",
+        "passwd": "",
         "database": "test1"
     }
 ]
@@ -29,17 +29,17 @@ def connect(**params):
     return conn
 
 
-class StudentDao(BaseDao):
+class StudentDao(CRUDHelper):
     def __init__(self):
         super().__init__(connect(cursorclass=pymysql.cursors.DictCursor), "student")
 
 
-class ClassDao(BaseDao):
+class ClassDao(CRUDHelper):
     def __init__(self):
         super().__init__(connect(cursorclass=pymysql.cursors.DictCursor), "class")
 
 
-class TeacherDao(BaseDao):
+class TeacherDao(CRUDHelper):
     def __init__(self):
         super().__init__(connect(cursorclass=pymysql.cursors.DictCursor), "teacher")
 

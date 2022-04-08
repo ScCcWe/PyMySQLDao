@@ -19,7 +19,7 @@ class TestSelectByField(base.PyMySQLDaoTestCase):
 
     def test_query(self):
         assert self.studentDao.select_by_field("student_name", "张三")[0] == student_list_123[0]
-        assert self.studentDao.select_by_field("student_name", "张三", limit=5)[0] == student_list_123[0]
+        assert self.studentDao.select_by_field("student_name", "张三", size=5)[0] == student_list_123[0]
 
     def tearDown(self) -> None:
         # super(TestSelectByField, self).tearDown()

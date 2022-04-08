@@ -12,10 +12,9 @@ class TestSelectList(base.PyMySQLDaoTestCase):
         super(TestSelectList, self).setUp()
 
     def test_query_length(self):
-        assert len(self.studentDao.select_list()) == 3
+        assert len(self.studentDao.select_list()) == 3 == len(self.studentDao.select_list(3))
         assert len(self.studentDao.select_list(1)) == 1
         assert len(self.studentDao.select_list(2)) == 2
-        assert len(self.studentDao.select_list(3)) == 3
 
     def test_query(self):
         assert self.studentDao.select_list() == student_list_123

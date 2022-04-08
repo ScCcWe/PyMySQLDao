@@ -1,41 +1,34 @@
 # !/usr/bin/env python 
 # -*- coding: utf-8 -*-
-# file_name: base_.py
+# file_name: execute_helper.py
 # author: ScCcWe
 # time: 2022/3/8 9:48 上午
-import logging
-
 from pymysql.connections import Connection
-from pymysqldao.constant_ import MODULE_NAME
+
+from pymysqldao.log_.base_ import LoggerController, LOGGER
 from pymysqldao.err_ import ParamBoolFalseError, ParamTypeError
 from pymysqldao.msg_ import param_cant_none
 
-"""
-在使用pymysqldao时，可以自行设置LOGGER的输出方式和格式；
 
-    如下设置例：展示DEBUG及以上信息，并打印在控制台上
-    >>> import sys
-    >>> import logging
-    >>> 
-    >>> from pymysqldao import LOGGER
-    >>> 
-    >>> LOGGER.setLevel(logging.DEBUG)
-    >>> LOGGER.addHandler(logging.StreamHandler(sys.stderr))
-    
-"""
-LOGGER = logging.getLogger(MODULE_NAME)
-
-
-class DatabaseDao:
-    def __init__(self, connection: Connection):
+class ExecuteHelper:
+    def __init__(
+            self,
+            connection: Connection,
+            use_own_log_config=False,
+            *args,
+            **kwargs,
+    ):
         if not connection:
             raise ParamBoolFalseError(param_cant_none("connection"))
         elif type(connection) != Connection:
             raise ParamTypeError("param connection can only accept pymysql.connections.Connection type")
         else:
-            # _表示私有属性，别人最好不要在外部修改；
-            # 即：最好在创建对象时指定
+            # _表示私有属性；
+            # 即：供内部使用，如果外部要使用，最好在实例化对象时指定；
             self._connection = connection
+
+            if not use_own_log_config:
+                LoggerController().stderr_()
 
     def execute_sql(self, sql: str, commit: bool = False):
         """

@@ -9,7 +9,7 @@ import setuptools
 with open("./README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-version_str = "0.0.9"
+version_str = "0.0.10"
 
 
 def get_install_requires():

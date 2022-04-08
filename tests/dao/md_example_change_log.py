@@ -3,8 +3,14 @@
 # file_name: md_examples.py
 # author: ScCcWe
 # time: 2022/3/9 9:23 上午
+import sys
+import logging
+
 import pymysql
-from pymysqldao import CRUDHelper
+from pymysqldao import CRUDHelper, LOGGER
+
+LOGGER.setLevel(logging.DEBUG)
+LOGGER.addHandler(logging.StreamHandler(sys.stderr))
 
 conn = pymysql.connect(
     host='localhost',
@@ -17,7 +23,7 @@ conn = pymysql.connect(
 
 class ClassDao(CRUDHelper):
     def __init__(self):
-        super().__init__(connection=conn, table_name="class", size=500)
+        super().__init__(connection=conn, table_name="class", size=500, use_own_log_config=True)
 
 
 if __name__ == '__main__':
