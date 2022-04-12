@@ -1,6 +1,6 @@
 # !/usr/bin/env python 
 # -*- coding: utf-8 -*-
-# file_name: reterive_helper.py
+# file_name: retrieve_.py
 # author: ScCcWe
 # time: 2022/4/8 2:53 下午
 from typing import List, Dict, Union
@@ -8,13 +8,12 @@ from typing import List, Dict, Union
 from pymysql.connections import Connection
 from pydantic import BaseModel, validator
 
-import pymysqldao.log_.base_
 from pymysqldao import msg_
+from pymysqldao.log_controller import LOGGER
 from pymysqldao.err_ import (
-    ParamBoolFalseError,
     PrimaryKeyError,
 )
-from pymysqldao.helpers.base_helper import BaseHelper
+from pymysqldao.mixin_ import BaseMixin
 
 
 class VSelectById(BaseModel):
@@ -84,20 +83,17 @@ class VSelectByIdList(BaseModel):
 #     size: int
 
 
-class RetreiveHelper(BaseHelper):
+class RetrieveHelper(BaseMixin):
     def __init__(
             self,
             connection: Connection,
             table_name: str,
-            use_own_log_config=False,
             size: int = None,
             *args,
             **kwargs,
     ):
-        super().__init__(connection, table_name, use_own_log_config, *args, **kwargs)
-
         self.size = size
-        print("self.size: ", self.size)
+        super().__init__(connection, table_name, *args, **kwargs)
 
     def validation_select_by_id(self, params: VSelectById) -> Dict:
         """
@@ -114,7 +110,7 @@ class RetreiveHelper(BaseHelper):
             return query_list[0]
         else:
             msg = f"check out if use the right primary key? current primary key is: {primary_key}"
-            pymysqldao.log_.base_.LOGGER.error(msg)
+            LOGGER.error(msg)
             raise PrimaryKeyError(msg)
 
     def select_by_id(self, id_value: Union[str, int], primary_key: str = 'id') -> Dict:
@@ -146,16 +142,16 @@ class RetreiveHelper(BaseHelper):
             with self._connection.cursor() as cursor:
                 execute_result = cursor.execute(sql, ([str(_) for _ in id_list],))
 
-                pymysqldao.log_.base_.LOGGER.info(f"Execute SQL: {sql}")
-                pymysqldao.log_.base_.LOGGER.info(f"Query OK, {execute_result} rows affected")
+                LOGGER.info(f"Execute SQL: {sql}")
+                LOGGER.info(f"Query OK, {execute_result} rows affected")
 
                 if limit_size:
                     result = cursor.fetchmany(limit_size)
                 else:
                     result = cursor.fetchall()
         except Exception as e:
-            pymysqldao.log_.base_.LOGGER.exception(f"Execute SQL: {sql}")
-            pymysqldao.log_.base_.LOGGER.exception(f"Query Exception: {e}")
+            LOGGER.exception(f"Execute SQL: {sql}")
+            LOGGER.exception(f"Query Exception: {e}")
         finally:
             return result if result else None
 
@@ -172,16 +168,16 @@ class RetreiveHelper(BaseHelper):
             with self._connection.cursor() as cursor:
                 execute_result = cursor.execute(sql, (str(field_value),))
 
-                pymysqldao.log_.base_.LOGGER.info(f"Execute SQL: {sql}")
-                pymysqldao.log_.base_.LOGGER.info(f"Query OK, {execute_result} rows affected")
+                LOGGER.info(f"Execute SQL: {sql}")
+                LOGGER.info(f"Query OK, {execute_result} rows affected")
 
                 if limit_size:
                     result = cursor.fetchmany(limit_size)
                 else:
                     result = cursor.fetchall()
         except Exception as e:
-            pymysqldao.log_.base_.LOGGER.exception(f"Execute SQL: {sql}")
-            pymysqldao.log_.base_.LOGGER.exception(f"Query Exception: {e}")
+            LOGGER.exception(f"Execute SQL: {sql}")
+            LOGGER.exception(f"Query Exception: {e}")
         finally:
             return result if result else None
 
@@ -215,12 +211,12 @@ class RetreiveHelper(BaseHelper):
         try:
             with self._connection.cursor() as cursor:
                 execute = cursor.execute(sql)
-                pymysqldao.log_.base_.LOGGER.info(f"Execute SQL: {sql}")
-                pymysqldao.log_.base_.LOGGER.info(f"Query OK, {execute} rows affected")
+                LOGGER.info(f"Execute SQL: {sql}")
+                LOGGER.info(f"Query OK, {execute} rows affected")
 
                 result = cursor.fetchall()
         except Exception as e:
-            pymysqldao.log_.base_.LOGGER.exception(f"Execute SQL: {sql}")
-            pymysqldao.log_.base_.LOGGER.exception(f"Query Exception: {e}")
+            LOGGER.exception(f"Execute SQL: {sql}")
+            LOGGER.exception(f"Query Exception: {e}")
         finally:
             return result if result is not None else None

@@ -1,27 +1,26 @@
 # !/usr/bin/env python 
 # -*- coding: utf-8 -*-
-# file_name: create_helper.py
+# file_name: create_.py
 # author: ScCcWe
 # time: 2022/4/8 3:10 下午
-from typing import List, Dict, Union
+from typing import List, Dict
 
 from pymysql.connections import Connection
 
-import pymysqldao.log_.base_
 from pymysqldao import msg_
-from pymysqldao.helpers.base_helper import BaseHelper
+from pymysqldao.log_controller import LOGGER
+from pymysqldao.mixin_ import BaseMixin
 
 
-class DeleteHelper(BaseHelper):
+class DeleteHelper(BaseMixin):
     def __init__(
             self,
             connection: Connection,
             table_name: str,
-            use_own_log_config=False,
             *args,
             **kwargs
     ):
-        super().__init__(connection, table_name, use_own_log_config, *args, **kwargs)
+        super().__init__(connection, table_name, *args, **kwargs)
 
     def delete_by_field(self, field_value, field_key):
         """
@@ -74,14 +73,14 @@ class DeleteHelper(BaseHelper):
                 sql = f"delete from {self._table_name} where {primary_key} = %s"
                 rows = cursor.execute(sql, (id_value,))
 
-                pymysqldao.log_.base_.LOGGER.info(f"Execute SQL: {sql}")
-                pymysqldao.log_.base_.LOGGER.info(f"Query OK, {rows} rows affected")
+                LOGGER.info(f"Execute SQL: {sql}")
+                LOGGER.info(f"Query OK, {rows} rows affected")
 
             if not self._connection.get_autocommit():
                 self._connection.commit()
         except Exception as e:
-            pymysqldao.log_.base_.LOGGER.exception(f"Execute SQL: {sql}")
-            pymysqldao.log_.base_.LOGGER.exception(f"Query Exception: {e}")
+            LOGGER.exception(f"Execute SQL: {sql}")
+            LOGGER.exception(f"Query Exception: {e}")
         finally:
             return rows if rows else None
 

@@ -98,8 +98,8 @@ class PyMySQLDaoTestCase(unittest.TestCase):
     #
     #     return self.conn
 
-    def tearDown(self) -> None:
-        with self.conn:
-            with self.conn.cursor() as cursor:
-                cursor.execute("drop table student")
-            self.conn.commit()
+    # def tearDown(self) -> None:
+    #     with self.conn:
+    #         with self.conn.cursor() as cursor:
+    #             cursor.execute("drop table student")
+    #         self.conn.commit()

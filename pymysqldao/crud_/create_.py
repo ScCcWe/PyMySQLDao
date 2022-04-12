@@ -1,32 +1,30 @@
 # !/usr/bin/env python 
 # -*- coding: utf-8 -*-
-# file_name: create_helper.py
+# file_name: create_.py
 # author: ScCcWe
 # time: 2022/4/8 3:10 下午
-from typing import List, Dict, Union
+from typing import List, Dict
 
 from pymysql.connections import Connection
 
-import pymysqldao.log_.base_
+from pymysqldao.log_controller import LOGGER
 from pymysqldao import msg_
 from pymysqldao.err_ import (
     ParamTypeError,
-    ParamBoolFalseError,
-    PrimaryKeyError,
+    ParamNoneError,
 )
-from pymysqldao.helpers.base_helper import BaseHelper
+from pymysqldao.mixin_ import BaseMixin
 
 
-class CreateHelper(BaseHelper):
+class CreateHelper(BaseMixin):
     def __init__(
             self,
             connection: Connection,
             table_name: str,
-            use_own_log_config=False,
             *args,
             **kwargs,
     ):
-        super().__init__(connection, table_name, use_own_log_config, *args, **kwargs)
+        super().__init__(connection, table_name, *args, **kwargs)
 
     def insert_one(self, obj_dict: Dict, primary_key: str = "id"):
         """
@@ -63,20 +61,20 @@ class CreateHelper(BaseHelper):
                 sql, value_list = generate_sql(obj_dict)
                 row_num = cursor.execute(sql, tuple(value_list))
 
-                pymysqldao.log_.base_.LOGGER.info(f"Execute SQL: {sql}")
-                pymysqldao.log_.base_.LOGGER.info(f"Query OK, {row_num} rows affected")
+                LOGGER.info(f"Execute SQL: {sql}")
+                LOGGER.info(f"Query OK, {row_num} rows affected")
 
             if not self._connection.get_autocommit():
                 self._connection.commit()
         except Exception as e:
-            pymysqldao.log_.base_.LOGGER.exception(f"Execute SQL: {sql}")
-            pymysqldao.log_.base_.LOGGER.exception(f"Query Exception: {e}")
+            LOGGER.exception(f"Execute SQL: {sql}")
+            LOGGER.exception(f"Query Exception: {e}")
         finally:
             return row_num if row_num else None
 
     def insert_many(self, obj_dict_list: List[Dict[str, object]]):
         if not obj_dict_list:
-            raise ParamBoolFalseError(msg_.param_cant_none("obj_dict_list"))
+            raise ParamNoneError(msg_.param_cant_none("obj_dict_list"))
         if not isinstance(obj_dict_list, list):
             raise ParamTypeError(msg_.param_only_accept_list("obj_dict_list"))
 

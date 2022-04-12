@@ -34,7 +34,7 @@ PyMySQLDao是建立在PyMySQL上的功能增强库，方便用户进行CRUD；
 
 ### 1)使用pymysqldao进行CRUD
 
-假设使用此[SQL文件](https://github.com/ScCcWe/PyMySQLDao/blob/master/tests/dao/data.sql)
+假设使用此[SQL文件](https://github.com/ScCcWe/PyMySQLDao/blob/master/examples/data.sql)
 
 ```python
 # !/usr/bin/env python 
@@ -126,4 +126,3 @@ if __name__ == '__main__':
     # select * from class limit 2
     dao.select_list(2)
 ```
-

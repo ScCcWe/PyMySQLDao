@@ -1,25 +1,24 @@
 # !/usr/bin/env python 
 # -*- coding: utf-8 -*-
-# file_name: execute_helper.py
+# file_name: log_controller.py
 # author: ScCcWe
-# time: 2022/3/8 9:48 上午
+# time: 2022/4/12 10:21 上午
+from pymysql import Connection
 from pymysql.connections import Connection
 
-from pymysqldao.log_.base_ import LoggerController, LOGGER
-from pymysqldao.err_ import ParamBoolFalseError, ParamTypeError
-from pymysqldao.msg_ import param_cant_none
+from .err_ import ParamNoneError, ParamTypeError
+from .log_controller import LOGGER
 
 
-class ExecuteHelper:
+class DataBaseConnectionMixin:
     def __init__(
             self,
             connection: Connection,
-            use_own_log_config=False,
             *args,
             **kwargs,
     ):
         if not connection:
-            raise ParamBoolFalseError(param_cant_none("connection"))
+            raise ParamNoneError("param `connection` can't accept none value")
         elif type(connection) != Connection:
             raise ParamTypeError("param connection can only accept pymysql.connections.Connection type")
         else:
@@ -27,8 +26,39 @@ class ExecuteHelper:
             # 即：供内部使用，如果外部要使用，最好在实例化对象时指定；
             self._connection = connection
 
-            if not use_own_log_config:
-                LoggerController().stderr_()
+        # 超类继续初始化
+        super().__init__(*args, **kwargs)
+
+
+class TableMixin:
+    def __init__(
+            self,
+            table_name: str,
+            *args,
+            **kwargs,
+    ):
+        if not table_name:
+            raise ParamNoneError("param `table_name` can't accept none value")
+        else:
+            self._table_name = table_name
+
+        super().__init__(*args, **kwargs)
+
+
+class BaseMixin(DataBaseConnectionMixin, TableMixin):
+    def __init__(
+            self,
+            connection: Connection,
+            table_name: str,
+            *args,
+            **kwargs,
+    ):
+        super().__init__(
+            connection,
+            table_name,
+            *args,
+            **kwargs
+        )
 
     def execute_sql(self, sql: str, commit: bool = False):
         """
@@ -70,3 +100,17 @@ class ExecuteHelper:
             LOGGER.exception(f"Query Exception: {e}")
         finally:
             return result if result else None
+
+
+if __name__ == '__main__':
+    import pymysql
+
+    conn = pymysql.connect(
+        host='localhost',
+        user='root',
+        password='',
+        database='python_example',
+        cursorclass=pymysql.cursors.DictCursor
+    )
+    ins = BaseMixin(connection=conn, table_name="class", size=500)
+    print(ins)

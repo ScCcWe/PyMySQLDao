@@ -3,7 +3,7 @@
 # file_name: err_.py
 # author: ScCcWe
 # time: 2022/3/6 10:54 上午
-class ParamBoolFalseError(ValueError):
+class ParamNoneError(ValueError):
     """
     bool(value) -> False
 

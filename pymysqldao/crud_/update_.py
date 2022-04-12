@@ -1,32 +1,30 @@
 # !/usr/bin/env python 
 # -*- coding: utf-8 -*-
-# file_name: create_helper.py
+# file_name: create_.py
 # author: ScCcWe
 # time: 2022/4/8 3:10 下午
-from typing import List, Dict, Union
+from typing import Dict
 
 from pymysql.connections import Connection
-import pymysqldao.log_.base_
 from pymysqldao.err_ import (
     ParamTypeError,
-    ParamBoolFalseError,
+    ParamNoneError,
     PrimaryKeyError,
 )
-import pymysqldao.log_.base_
 from pymysqldao import msg_
-from pymysqldao.helpers.base_helper import BaseHelper
+from pymysqldao.log_controller import LOGGER
+from pymysqldao.mixin_ import BaseMixin
 
 
-class UpdateHelper(BaseHelper):
+class UpdateHelper(BaseMixin):
     def __init__(
             self,
             connection: Connection,
             table_name: str,
-            use_own_log_config=False,
             *args,
             **kwargs
     ):
-        super().__init__(connection, table_name, use_own_log_config, *args, **kwargs)
+        super().__init__(connection, table_name, *args, **kwargs)
 
     def update_by_id(self, obj_dict: Dict, primary_key="id"):
         """
@@ -48,7 +46,7 @@ class UpdateHelper(BaseHelper):
             return f"update {self._table_name} set {', '.join(field_value_list)} where {primary_key} = %s"
 
         if not obj_dict:
-            raise ParamBoolFalseError(msg_.param_cant_none("obj_dict"))
+            raise ParamNoneError(msg_.param_cant_none("obj_dict"))
         if not isinstance(obj_dict, dict):
             raise ParamTypeError(msg_.param_only_accept_dict("obj_dict"))
 
@@ -60,13 +58,13 @@ class UpdateHelper(BaseHelper):
                 sql = generate_sql(obj_dict)
                 row_num = cursor.execute(sql, (obj_dict.get(primary_key),))
 
-                pymysqldao.log_.base_.LOGGER.info(f"Execute SQL: {sql}")
-                pymysqldao.log_.base_.LOGGER.info(f"Query OK, {row_num} rows affected")
+                LOGGER.info(f"Execute SQL: {sql}")
+                LOGGER.info(f"Query OK, {row_num} rows affected")
 
             if not self._connection.get_autocommit():
                 self._connection.commit()
         except Exception as e:
-            pymysqldao.log_.base_.LOGGER.exception(f"Execute SQL: {sql}")
-            pymysqldao.log_.base_.LOGGER.exception(f"Query Exception: {e}")
+            LOGGER.exception(f"Execute SQL: {sql}")
+            LOGGER.exception(f"Query Exception: {e}")
         finally:
             return row_num if row_num else None
