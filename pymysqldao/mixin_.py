@@ -22,9 +22,7 @@ class DataBaseConnectionMixin:
         elif type(connection) != Connection:
             raise ParamTypeError("param connection can only accept pymysql.connections.Connection type")
         else:
-            # _表示私有属性；
-            # 即：供内部使用，如果外部要使用，最好在实例化对象时指定；
-            self._connection = connection
+            self.connection = connection
 
         # 超类继续初始化
         super().__init__(*args, **kwargs)
@@ -40,12 +38,12 @@ class TableMixin:
         if not table_name:
             raise ParamNoneError("param `table_name` can't accept none value")
         else:
-            self._table_name = table_name
+            self.table_name = table_name
 
         super().__init__(*args, **kwargs)
 
 
-class BaseMixin(DataBaseConnectionMixin, TableMixin):
+class CRUDBaseMixin(DataBaseConnectionMixin, TableMixin):
     def __init__(
             self,
             connection: Connection,
@@ -76,7 +74,7 @@ class BaseMixin(DataBaseConnectionMixin, TableMixin):
             raise TypeError
 
         try:
-            with self._connection.cursor() as cursor:
+            with self.connection.cursor() as cursor:
                 rows = cursor.execute(sql)
 
                 LOGGER.info(f"Execute SQL: {sql}")
@@ -84,14 +82,14 @@ class BaseMixin(DataBaseConnectionMixin, TableMixin):
 
                 result = cursor.fetchall()
 
-                if self._connection.get_autocommit() or commit:
-                    self._connection.commit()
+                if self.connection.get_autocommit() or commit:
+                    self.connection.commit()
 
                 # 需要commit的操作，会自动commit，并将结果改成受影响的行数
                 ops_list = ["insert", "update", "delete"]
                 for ops in ops_list:
                     if ops in sql:
-                        self._connection.commit()
+                        self.connection.commit()
                         result = rows
                         break
 
@@ -112,5 +110,5 @@ if __name__ == '__main__':
         database='python_example',
         cursorclass=pymysql.cursors.DictCursor
     )
-    ins = BaseMixin(connection=conn, table_name="class", size=500)
+    ins = CRUDBaseMixin(connection=conn, table_name="class", size=500)
     print(ins)

@@ -17,7 +17,7 @@ conn = pymysql.connect(
 
 class ClassDao(CRUDHelper):
     def __init__(self):
-        super().__init__(connection=conn, table_name="class", size=500)
+        super().__init__(connection=conn, table_name="class", size=50)
 
 
 if __name__ == '__main__':

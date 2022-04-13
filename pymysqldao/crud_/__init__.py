@@ -22,6 +22,15 @@ class CRUDHelper(CreateHelper, RetrieveHelper, UpdateHelper, DeleteHelper):
             *args,
             **kwargs,
     ):
+        """
+        提供类似于orm的，crud功能增强
+        :param connection:
+        :param table_name:
+        :param use_own_log_config:
+        :param size: 全局的limit_size
+        :param args:
+        :param kwargs:
+        """
         if not use_own_log_config:
             LOGGER.info(f"use default log format")
             log_controller_ins = LoggerController()

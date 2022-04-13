@@ -13,7 +13,7 @@ from pymysqldao.log_controller import LOGGER
 from pymysqldao.err_ import (
     PrimaryKeyError,
 )
-from pymysqldao.mixin_ import BaseMixin
+from pymysqldao.mixin_ import CRUDBaseMixin
 
 
 class VSelectById(BaseModel):
@@ -39,7 +39,7 @@ class VSelectByField(BaseModel):
 
     # 限制显示的结果数量
     # 默认为20
-    limit_size: int = 20
+    limit_size: int
 
     @validator("field_key")
     def field_key_cant_none(cls, v):
@@ -83,7 +83,7 @@ class VSelectByIdList(BaseModel):
 #     size: int
 
 
-class RetrieveHelper(BaseMixin):
+class RetrieveHelper(CRUDBaseMixin):
     def __init__(
             self,
             connection: Connection,
@@ -92,7 +92,7 @@ class RetrieveHelper(BaseMixin):
             *args,
             **kwargs,
     ):
-        self.size = size
+        self.global_size = size
         super().__init__(connection, table_name, *args, **kwargs)
 
     def validation_select_by_id(self, params: VSelectById) -> Dict:
@@ -113,7 +113,15 @@ class RetrieveHelper(BaseMixin):
             LOGGER.error(msg)
             raise PrimaryKeyError(msg)
 
-    def select_by_id(self, id_value: Union[str, int], primary_key: str = 'id') -> Dict:
+    def select_by_id(self,
+                     id_value: Union[str, int],
+                     primary_key: str = 'id') -> Dict:
+        """
+        查询出一条数据才是正常的
+        :param id_value:
+        :param primary_key:
+        :return:
+        """
         params_input = {
             "id_value": id_value,
             "primary_key": primary_key,
@@ -137,9 +145,9 @@ class RetrieveHelper(BaseMixin):
         """
         id_list, limit_size, primary_key = params.id_list, params.limit_size, params.primary_key
 
-        sql = f"select * from {self._table_name} where {primary_key} in %s"
+        sql = f"select * from {self.table_name} where {primary_key} in %s"
         try:
-            with self._connection.cursor() as cursor:
+            with self.connection.cursor() as cursor:
                 execute_result = cursor.execute(sql, ([str(_) for _ in id_list],))
 
                 LOGGER.info(f"Execute SQL: {sql}")
@@ -163,9 +171,9 @@ class RetrieveHelper(BaseMixin):
         field_value = params.field_value
         limit_size = params.limit_size
 
-        sql = f"select * from {self._table_name} where {field_key} = %s"
+        sql = f"select * from {self.table_name} where {field_key} = %s"
         try:
-            with self._connection.cursor() as cursor:
+            with self.connection.cursor() as cursor:
                 execute_result = cursor.execute(sql, (str(field_value),))
 
                 LOGGER.info(f"Execute SQL: {sql}")
@@ -181,14 +189,23 @@ class RetrieveHelper(BaseMixin):
         finally:
             return result if result else None
 
-    def select_by_field(self, key: str, value: str, size: int = 20):
+    def select_by_field(self,
+                        key: str,
+                        value: str,
+                        size: int = None):
         """
         select * from `table` where `key` = value limit `size`
         :param key: 字段名
         :param value: 字段值
-        :param size:
+        :param size: limit值，默认为20
         :return:
         """
+        if not size and not self.global_size:
+            size = 20
+        else:
+            if self.global_size:
+                size = self.global_size
+
         input_params = {
             "field_key": key,
             "field_value": value,
@@ -203,18 +220,20 @@ class RetrieveHelper(BaseMixin):
         :param size:
         :return: List[Dict]
         """
-        if not size:
-            sql = f"select * from {self._table_name}"
+        if not size and not self.global_size:
+            sql = f"select * from {self.table_name}"
         else:
-            sql = f"select * from {self._table_name} limit {size}"
+            if size:
+                sql = f"select * from {self.table_name} limit {size}"
+            else:  # elif self.global_size:
+                sql = f"select * from {self.table_name} limit {self.global_size}"
 
         try:
-            with self._connection.cursor() as cursor:
+            with self.connection.cursor() as cursor:
                 execute = cursor.execute(sql)
+                result = cursor.fetchall()
                 LOGGER.info(f"Execute SQL: {sql}")
                 LOGGER.info(f"Query OK, {execute} rows affected")
-
-                result = cursor.fetchall()
         except Exception as e:
             LOGGER.exception(f"Execute SQL: {sql}")
             LOGGER.exception(f"Query Exception: {e}")

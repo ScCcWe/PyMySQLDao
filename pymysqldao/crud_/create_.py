@@ -13,10 +13,10 @@ from pymysqldao.err_ import (
     ParamTypeError,
     ParamNoneError,
 )
-from pymysqldao.mixin_ import BaseMixin
+from pymysqldao.mixin_ import CRUDBaseMixin
 
 
-class CreateHelper(BaseMixin):
+class CreateHelper(CRUDBaseMixin):
     def __init__(
             self,
             connection: Connection,
@@ -49,7 +49,7 @@ class CreateHelper(BaseMixin):
                     field_list.insert(0, key)
                     value_list.insert(0, str(value))
                 placeholder_list.append("%s")
-            sql = f"INSERT INTO {self._table_name} ({', '.join(field_list)}) " \
+            sql = f"INSERT INTO {self.table_name} ({', '.join(field_list)}) " \
                   f"VALUES ({', '.join(placeholder_list)})"
             return sql, value_list
 
@@ -57,15 +57,15 @@ class CreateHelper(BaseMixin):
             raise TypeError(msg_.param_only_accept_dict("obj_dict"))
 
         try:
-            with self._connection.cursor() as cursor:
+            with self.connection.cursor() as cursor:
                 sql, value_list = generate_sql(obj_dict)
                 row_num = cursor.execute(sql, tuple(value_list))
 
                 LOGGER.info(f"Execute SQL: {sql}")
                 LOGGER.info(f"Query OK, {row_num} rows affected")
 
-            if not self._connection.get_autocommit():
-                self._connection.commit()
+            if not self.connection.get_autocommit():
+                self.connection.commit()
         except Exception as e:
             LOGGER.exception(f"Execute SQL: {sql}")
             LOGGER.exception(f"Query Exception: {e}")

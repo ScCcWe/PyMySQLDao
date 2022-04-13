@@ -13,10 +13,10 @@ from pymysqldao.err_ import (
 )
 from pymysqldao import msg_
 from pymysqldao.log_controller import LOGGER
-from pymysqldao.mixin_ import BaseMixin
+from pymysqldao.mixin_ import CRUDBaseMixin
 
 
-class UpdateHelper(BaseMixin):
+class UpdateHelper(CRUDBaseMixin):
     def __init__(
             self,
             connection: Connection,
@@ -43,7 +43,7 @@ class UpdateHelper(BaseMixin):
                     if type(value) == str:
                         value = "'" + value + "'"
                     field_value_list.append(field + '=' + str(value))
-            return f"update {self._table_name} set {', '.join(field_value_list)} where {primary_key} = %s"
+            return f"update {self.table_name} set {', '.join(field_value_list)} where {primary_key} = %s"
 
         if not obj_dict:
             raise ParamNoneError(msg_.param_cant_none("obj_dict"))
@@ -54,15 +54,15 @@ class UpdateHelper(BaseMixin):
             raise PrimaryKeyError("如果主键列名不是`id`，请显式的指出主键列名")
 
         try:
-            with self._connection.cursor() as cursor:
+            with self.connection.cursor() as cursor:
                 sql = generate_sql(obj_dict)
                 row_num = cursor.execute(sql, (obj_dict.get(primary_key),))
 
                 LOGGER.info(f"Execute SQL: {sql}")
                 LOGGER.info(f"Query OK, {row_num} rows affected")
 
-            if not self._connection.get_autocommit():
-                self._connection.commit()
+            if not self.connection.get_autocommit():
+                self.connection.commit()
         except Exception as e:
             LOGGER.exception(f"Execute SQL: {sql}")
             LOGGER.exception(f"Query Exception: {e}")

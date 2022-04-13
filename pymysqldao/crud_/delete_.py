@@ -9,10 +9,10 @@ from pymysql.connections import Connection
 
 from pymysqldao import msg_
 from pymysqldao.log_controller import LOGGER
-from pymysqldao.mixin_ import BaseMixin
+from pymysqldao.mixin_ import CRUDBaseMixin
 
 
-class DeleteHelper(BaseMixin):
+class DeleteHelper(CRUDBaseMixin):
     def __init__(
             self,
             connection: Connection,
@@ -69,15 +69,15 @@ class DeleteHelper(BaseMixin):
             raise TypeError(msg_.param_should_unionStrInt("id_value"))
 
         try:
-            with self._connection.cursor() as cursor:
-                sql = f"delete from {self._table_name} where {primary_key} = %s"
+            with self.connection.cursor() as cursor:
+                sql = f"delete from {self.table_name} where {primary_key} = %s"
                 rows = cursor.execute(sql, (id_value,))
 
                 LOGGER.info(f"Execute SQL: {sql}")
                 LOGGER.info(f"Query OK, {rows} rows affected")
 
-            if not self._connection.get_autocommit():
-                self._connection.commit()
+            if not self.connection.get_autocommit():
+                self.connection.commit()
         except Exception as e:
             LOGGER.exception(f"Execute SQL: {sql}")
             LOGGER.exception(f"Query Exception: {e}")
